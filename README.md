@@ -1,18 +1,25 @@
 from pygame import *
-bg = image.load("bg.jpg")
-bg = transform.scale(bg, (650, 750))
 
-# Создание окна
-window = display.set_mode((650, 750))
-display.set_caption("ping pong")
-fps = 60
+font.init()
+
+win_width = 700
+win_height = 500
+FPS = 60
 clock = time.Clock()
+exit = False
 
-class GameSprite(sprite.Sprite):
-    def __init__(self, player_image, player_x, player_y, player_speed, width, height):
+bg = image.load("ppbg.jpg")
+bg = transform.scale(bg, (win_width, win_height))
+
+window = display.set_mode((win_width, win_height))
+
+display.set_caption("Ping_pong")
+
+
+class GameSpite(sprite.Sprite):
+    def __init__(self, player_image, player_x, player_y, width, height):
         super().__init__()
         self.image = transform.scale(image.load(player_image), (width, height))
-        self.speed = player_speed
         self.rect = self.image.get_rect()
         self.rect.x = player_x
         self.rect.y = player_y
@@ -20,62 +27,89 @@ class GameSprite(sprite.Sprite):
     def reset(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
-class Player(GameSprite):
-    def __init__(self, player_image, player_x, player_y, player_speed, width, hieght, speed):
 
+class Player(GameSpite):
+    def __init__(self, player_image, player_x, player_y, width, height, player_speed):
+        super().__init__(player_image, player_x, player_y, width, height)
+        self.speed = player_speed
     def update_l(self):
         keys = key.get_pressed()
-        if keys[K_w] and self.rect.y > 5:
+        if keys[K_w] and self.rect.y > 5: 
             self.rect.y -= self.speed
-        if keys[K_s] and self.rect.y < 620:
+        if keys[K_s] and self.rect.y < win_height - 80:
             self.rect.y += self.speed
 
     def update_r(self):
         keys = key.get_pressed()
         if keys[K_UP] and self.rect.y > 5:
             self.rect.y -= self.speed
-        if keys[K_DOWN] and self.rect.y < 620:
+        if keys[K_DOWN] and self.rect.y < win_height - 80:
             self.rect.y += self.speed
 
 
-class Ball(GameSprite):
-    def __init__(self, color, width, height, speed_x, speed_y):
-        def update(self):
-            self.rect.x += self.speed_x
-            self.rect.y += self.speed_y
+class Ball(GameSpite):
+    def __init__(self, player_image, player_x, player_y, width, height, speed_x, speed_y):
+        super().__init__(player_image, player_x, player_y, width, height)
+        self.speed_x = speed_x
+        self.speed_y = speed_y
+    def update(self):
+        self.rect.x += self.speed_x
+        self.rect.y += self.speed_y
 
-exit = False
 
-player1 = Player("player1.png", 30, 30, 4, 50, 150)
-player2 = Player("player2.png", 580, 30, 4, 50, 150)
-ball = Ball((255, 255, 255), 20, 20, 1, 1)
+player_l = Player('leftside.png', 80, 100, 15, 110, 10)
+player_r = Player('rightside.png', win_width - 80, 100, 15, 110, 10)
+ball = Ball("ball.png", 100, 100, 50, 50, 5, 5)
 
-all_sprites = sprite.Group()
-all_sprites.add(player1, player2, ball)
-
-speed_y = 0.5
-speed_x = 0.5
 finish = False
-win_height = 0
+pause = True
+
+font = font.Font(None, 35)
+lose = 1
+
+def ball_collide():
+    if sprite.collide_rect(player_l, ball):
+        ball.speed_x *= -1
+        ball.speed_y += (ball.rect.centery - player_l.rect.centery) / 20
+    if sprite.collide_rect(player_r, ball):
+        ball.speed_x *= -1
+        ball.speed_y += (ball.rect.centery - player_r.rect.centery) / 20
+    if ball.rect.y > win_height - 50 or ball.rect.y < 0:
+        ball.speed_y *= -1
 
 while exit != True:
     for e in event.get():
         if e.type == QUIT:
             exit = True
-    keys = key.get pressed()
-    window.blit(bg, (0,0))
+    keys = key.get_pressed()
+    window.blit(bg, (0, 0))
     if finish != True:
-        if sprite.collide_rect(player1, ball):
-            speed_x *= -1
-        if ball.rect.y > win_height - 80 or ball.rect.y < 0:
-            speed_y *= -1
-        ball.update()
-        player1.update_l()
-        player2.update_r()
-        player2.reset()
-        player1.reset()
-        ball.reset()
-
+        if pause == False:
+            ball_collide()
+            if ball.rect.x < -50:
+                lose = font.render('PLAYER 1 LOSE!', True, (180, 0, 0))
+                finish = True
+            if ball.rect.x > win_width:
+                lose = font.render('PLAYER 2 LOSE!', True, (180, 0, 0))
+                finish = True
+            ball.update()
+            player_l.update_l()
+            player_r.update_r()
+        else:
+            window.blit(font.render('Press SPACE to start.', True, (255, 255, 255)), (250, 250))
+            if keys[K_SPACE]:
+                pause = False
+    else:
+        window.blit(lose, (250, 250))
+        if keys[K_r]:
+            ball.rect.x = 250
+            ball.rect.y = 100
+            ball.speed_x = 5
+            ball.speed_y = 5
+            finish = False
+            pause = True
+    player_r.reset()
+    player_l.reset()
+    ball.reset()
     display.update()
-    clock.tick(fps)
-    
+    clock.tick(FPS)
