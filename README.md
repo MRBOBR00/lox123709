@@ -8,7 +8,7 @@ FPS = 60
 clock = time.Clock()
 exit = False
 
-bg = image.load("ppbg.jpg")
+bg = image.load("bgpp.png")
 bg = transform.scale(bg, (win_width, win_height))
 
 window = display.set_mode((win_width, win_height))
@@ -57,9 +57,9 @@ class Ball(GameSpite):
         self.rect.y += self.speed_y
 
 
-player_l = Player('leftside.png', 80, 100, 15, 110, 10)
-player_r = Player('rightside.png', win_width - 80, 100, 15, 110, 10)
-ball = Ball("ball.png", 100, 100, 50, 50, 5, 5)
+player_l = Player('rightsidepp.png', 5, 100, 15, 110, 10)
+player_r = Player('leftsidepp.png', win_width - 20, 100, 15, 110, 10)
+ball = Ball("ballpp.png", 100, 100, 50, 50, 5, 5)
 
 finish = False
 pause = True
@@ -87,10 +87,10 @@ while exit != True:
         if pause == False:
             ball_collide()
             if ball.rect.x < -50:
-                lose = font.render('PLAYER 1 LOSE!', True, (180, 0, 0))
+                lose = font.render('player1 YOU LOSE!', True, (0, 0, 0))
                 finish = True
             if ball.rect.x > win_width:
-                lose = font.render('PLAYER 2 LOSE!', True, (180, 0, 0))
+                lose = font.render('player2 YOU LOSE!', True, (0, 0, 0))
                 finish = True
             ball.update()
             player_l.update_l()
@@ -113,3 +113,4 @@ while exit != True:
     ball.reset()
     display.update()
     clock.tick(FPS)
+    
