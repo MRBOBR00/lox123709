@@ -1,4 +1,5 @@
 from pygame import *
+import os
 
 font.init()
 
@@ -57,7 +58,7 @@ class Ball(GameSpite):
         self.rect.y += self.speed_y
 
 
-player_l = Player('rightsidepp.png', 5, 100, 15, 110, 10)
+player_l = Player('rightsidepp.png', 10, 100, 15, 115, 10)
 player_r = Player('leftsidepp.png', win_width - 20, 100, 15, 110, 10)
 ball = Ball("ballpp.png", 100, 100, 50, 50, 5, 5)
 
@@ -66,6 +67,11 @@ pause = True
 
 font = font.Font(None, 35)
 lose = 1
+
+music_file = "music.mp3"
+if os.path.exists(music_file):
+    mixer.music.load(music_file)
+    mixer.music.play(-1)
 
 def ball_collide():
     if sprite.collide_rect(player_l, ball):
